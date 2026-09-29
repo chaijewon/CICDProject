@@ -129,37 +129,40 @@ pipeline {
         // 6. Health Check
         // =================================================
 
+        // =================================================
+        // 6. Health Check
+        // =================================================
+
         stage('Health Check') {
 
             steps {
 
                 sh '''
-                    echo "Waiting for ${NEW_COLOR}..."
+                    echo "Waiting for ${NEW_COLOR} on port ${NEW_PORT}..."
+
+                    HEALTHY=false
 
                     for i in {1..30}
                     do
-
-                        if curl -f http://localhost:${NEW_PORT}/actuator/health
+                        # -s: 에러 메시지 출력 생략, -f: HTTP 에러 시 실패 리턴
+                        if curl -s -f http://localhost:${NEW_PORT}/actuator/health > /dev/null 2>&1
                         then
-
-                            echo "================================"
+                            echo "==============================s=="
                             echo "NEW SERVER IS HEALTHY"
                             echo "================================"
-
-                            exit 0
-
+                            HEALTHY=true
+                            break
                         fi
 
-                        echo "Waiting..."
-
+                        echo "Attempt $i/30: Waiting for application to start..."
                         sleep 3
-
                     done
 
-
-                    echo "Health Check Failed"
-
-                    exit 1
+                    if [ "$HEALTHY" = "false" ]; then
+                        echo "Health Check Failed. Printing container logs for debugging:"
+                        docker logs --tail 50 ${NEW_COLOR} || true
+                        exit 1
+                    fi
                 '''
             }
         }
