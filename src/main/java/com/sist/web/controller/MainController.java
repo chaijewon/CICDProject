@@ -11,4 +11,5 @@ public class MainController {
     	model.addAttribute("msg", "Hello CI/CD!!!");
     	return "main";
     }
+    
 }
