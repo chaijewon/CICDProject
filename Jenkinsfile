@@ -133,21 +133,31 @@ pipeline {
         // 6. Health Check
         // =================================================
 
+        // =================================================
+        // 6. Health Check
+        // =================================================
+
         stage('Health Check') {
 
             steps {
 
+                script {
+                    // NEW_COLOR 값("green" 또는 "blue")에 따라 실제 컨테이너 이름 매핑
+                    def targetContainer = (env.NEW_COLOR == "green") ? env.GREEN_CONTAINER : env.BLUE_CONTAINER
+                    env.TARGET_CONTAINER = targetContainer
+                }
+
                 sh '''
-                    echo "Waiting for ${NEW_COLOR} on port ${NEW_PORT}..."
+                    echo "Waiting for ${NEW_COLOR} (${TARGET_CONTAINER}) on port ${NEW_PORT}..."
 
                     HEALTHY=false
 
-                    for i in {1..30}
+                    # seq를 사용하여 1부터 30까지 안정적으로 반복
+                    for i in $(seq 1 30)
                     do
-                        # -s: 에러 메시지 출력 생략, -f: HTTP 에러 시 실패 리턴
                         if curl -s -f http://localhost:${NEW_PORT}/actuator/health > /dev/null 2>&1
                         then
-                            echo "==============================s=="
+                            echo "================================"
                             echo "NEW SERVER IS HEALTHY"
                             echo "================================"
                             HEALTHY=true
@@ -160,13 +170,12 @@ pipeline {
 
                     if [ "$HEALTHY" = "false" ]; then
                         echo "Health Check Failed. Printing container logs for debugging:"
-                        docker logs --tail 50 ${NEW_COLOR} || true
+                        docker logs --tail 50 ${TARGET_CONTAINER} || true
                         exit 1
                     fi
                 '''
             }
         }
-
 
         // =================================================
         // 7. Nginx 전환
