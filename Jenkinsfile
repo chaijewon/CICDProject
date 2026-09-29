@@ -172,6 +172,10 @@ pipeline {
         // 7. Nginx 전환
         // =================================================
 
+        // =================================================
+        // 7. Nginx 전환
+        // =================================================
+
         stage('Switch Nginx') {
 
             steps {
@@ -179,25 +183,20 @@ pipeline {
                 sh '''
                     echo "Switching Nginx..."
 
+                    # 1. 깃 워크스페이스에 있는 nginx.conf 파일 수정
                     if [ "${NEW_COLOR}" = "blue" ]
                     then
-
-                        sed -i \
-                        's/127.0.0.1:8082/127.0.0.1:8081/' \
-                        ${NGINX_CONF}
-
+                        sed -i 's/127.0.0.1:8082/127.0.0.1:8081/' nginx.conf
                     else
-
-                        sed -i \
-                        's/127.0.0.1:8081/127.0.0.1:8082/' \
-                        ${NGINX_CONF}
-
+                        sed -i 's/127.0.0.1:8081/127.0.0.1:8082/' nginx.conf
                     fi
 
+                    # 2. 수정된 파일을 실제 Nginx 설정 경로로 복사 (sudo 권한 필요시 설정 확인)
+                    sudo cp nginx.conf /home/ubuntu/app/nginx.conf
 
-                    nginx -t
-
-                    nginx -s reload
+                    # 3. Nginx 문법 검사 및 리로드
+                    sudo nginx -t
+                    sudo nginx -s reload
 
                     echo "Nginx switched to ${NEW_COLOR}"
                 '''
