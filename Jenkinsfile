@@ -10,7 +10,7 @@ pipeline {
 
         GREEN_CONTAINER = "spring-green"
 
-        NGINX_CONF = "/home/ubuntu/app/nginx.conf"
+        NGINX_CONF = "/home/sist/app/nginx.conf"
 
     }
 
@@ -80,7 +80,7 @@ pipeline {
                     def active = sh(
                         script: '''
                             grep -o "127.0.0.1:[0-9]*" \
-                            /home/ubuntu/app/nginx.conf \
+                            /home/sist/app/nginx.conf \
                             | head -1
                         ''',
                         returnStdout: true
@@ -192,7 +192,7 @@ pipeline {
                     fi
 
                     # 2. 수정된 파일을 실제 Nginx 설정 경로로 복사 (sudo 권한 필요시 설정 확인)
-                    sudo cp nginx.conf /home/ubuntu/app/nginx.conf
+                    sudo cp nginx.conf /home/sist/app/nginx.conf
 
                     # 3. Nginx 문법 검사 및 리로드
                     sudo nginx -t
