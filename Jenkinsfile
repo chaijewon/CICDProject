@@ -181,10 +181,6 @@ pipeline {
         // 7. Nginx 전환
         // =================================================
 
-        // =================================================
-        // 7. Nginx 전환
-        // =================================================
-
         stage('Switch Nginx') {
 
             steps {
@@ -200,12 +196,12 @@ pipeline {
                         sed -i 's/127.0.0.1:8081/127.0.0.1:8082/' nginx.conf
                     fi
 
-                    # 2. 수정된 파일을 실제 Nginx 설정 경로로 복사 (sudo 권한 필요시 설정 확인)
+                    # 2. 수정된 파일을 실제 Nginx 설정 경로로 복사
                     sudo cp nginx.conf /home/sist/app/nginx.conf
 
-                    # 3. Nginx 문법 검사 및 리로드
+                    # 3. Nginx 문법 검사 후 systemctl로 서비스 재시작
                     sudo nginx -t
-                    sudo nginx -s reload
+                    sudo systemctl restart nginx
 
                     echo "Nginx switched to ${NEW_COLOR}"
                 '''
